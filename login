@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8" />
+  <title>Firebase Authentication 範例</title>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
+  <style>
+    body { font-family: Arial, sans-serif; max-width: 400px; margin: 20px auto; }
+    input, button { width: 100%; padding: 8px; margin: 6px 0; }
+    #user-info { margin-top: 20px; }
+  </style>
+</head>
+<body>
+  <h2>Firebase 註冊 / 登入示範</h2>
+
+  <!-- Email/Password 註冊 -->
+  <input type="email" id="email" placeholder="輸入 Email" />
+  <input type="password" id="password" placeholder="輸入密碼" />
+  <button id="register-btn">註冊</button>
+  <button id="login-btn">登入</button>
+
+  <hr />
+
+  <!-- Google 登入 -->
+  <button id="google-login-btn">使用 Google 登入</button>
+
+  <div id="user-info"></div>
+
+  <button id="logout-btn" style="display:none;">登出</button>
+
+  <script>
+    // TODO: 替換成你的 Firebase 專案設定
+    const firebaseConfig = {
+        apiKey: "AIzaSy8mj8m1C4to9TR6tgLtu-M66HMig3o",
+        authDomain: "test-6eab5.firebaseapp.com",
+        projectId: "test-6eab5",
+        storageBucket: "test-6eab5.appspot.com",
+        messagingSenderId: "177279310655",
+        appId: "1:177279310655:web:b40b48f01e3e53a08929c0",
+        measurementId: "G-YY7TZQTN8G"
+    };
+
+
+    // 初始化 Firebase
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+
+    const emailInput = document.getElementById('email');
+    const passwordInput = document.getElementById('password');
+    const registerBtn = document.getElementById('register-btn');
+    const loginBtn = document.getElementById('login-btn');
+    const googleLoginBtn = document.getElementById('google-login-btn');
+    const logoutBtn = document.getElementById('logout-btn');
+    const userInfoDiv = document.getElementById('user-info');
+
+    // 註冊
+    registerBtn.addEventListener('click', () => {
+      const email = emailInput.value;
+      const password = passwordInput.value;
+      auth.createUserWithEmailAndPassword(email, password)
+        .then(userCredential => {
+          alert('註冊成功！');
+          emailInput.value = '';
+          passwordInput.value = '';
+        })
+        .catch(error => {
+          alert('註冊失敗：' + error.message);
+        });
+    });
+
+    // 登入
+    loginBtn.addEventListener('click', () => {
+      const email = emailInput.value;
+      const password = passwordInput.value;
+      auth.signInWithEmailAndPassword(email, password)
+        .then(userCredential => {
+          alert('登入成功！');
+          emailInput.value = '';
+          passwordInput.value = '';
+        })
+        .catch(error => {
+          alert('登入失敗：' + error.message);
+        });
+    });
+
+    // Google 登入
+    googleLoginBtn.addEventListener('click', () => {
+      const provider = new firebase.auth.GoogleAuthProvider();
+      auth.signInWithPopup(provider)
+        .then(result => {
+          alert('Google 登入成功！');
+        })
+        .catch(error => {
+          alert('Google 登入失敗：' + error.message);
+        });
+    });
+
+    // 登出
+    logoutBtn.addEventListener('click', () => {
+      auth.signOut().then(() => {
+        alert('已登出');
+      });
+    });
+
+    // 監聽登入狀態變化
+    auth.onAuthStateChanged(user => {
+      if (user) {
+        userInfoDiv.innerHTML = `
+          <p>歡迎，${user.email || user.displayName}</p>
+          <p>UID: ${user.uid}</p>
+        `;
+        logoutBtn.style.display = 'block';
+      } else {
+        userInfoDiv.innerHTML = '<p>尚未登入</p>';
+        logoutBtn.style.display = 'none';
+      }
+    });
+  </script>
+</body>
+</html>
